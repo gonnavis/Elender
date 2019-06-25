@@ -1,0 +1,20 @@
+{
+  "name": "elender",
+  "version": "0.0.1",
+  "description": "An Electron & three.js based, Blender-like opensource 3d software.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "https://github.com/gonnavis/Elender",
+  "keywords": [
+    "Electron",
+    "three.js",
+    "Blender",
+    "3d software"
+  ],
+  "author": "gonnavis",
+  "devDependencies": {
+    "electron": "^5.0.5"
+  }
+}
