@@ -1,4 +1,20 @@
 var camera, scene, renderer, control, orbit;
+var raycaster = new THREE.Raycaster();
+
+var mouse = new THREE.Vector2();
+var objects = []
+var selectedObjects = [];
+
+var composer, effectFXAA, outlinePass;
+
+var params = {
+  edgeStrength: 3.0,
+  edgeGlow: 0.0,
+  edgeThickness: 1.0,
+  pulsePeriod: 0,
+  rotate: false,
+  usePatternTexture: false
+};
 
 init();
 render();
@@ -47,9 +63,31 @@ function init() {
 
   var mesh = new THREE.Mesh(geometry, material);
   scene.add(mesh);
-
+  objects.push(mesh)
   control.attach(mesh);
   scene.add(control);
+
+
+
+  var geometry = new THREE.ConeGeometry(50, 200, 32);
+  var material = new THREE.MeshBasicMaterial({
+    color: 0xffff00
+  });
+  var cone = new THREE.Mesh(geometry, material);
+  scene.add(cone);
+  cone.position.x=-500
+  objects.push(cone)
+  // control.attach(cone)
+
+  // postprocessing
+
+  composer = new THREE.EffectComposer(renderer);
+
+  var renderPass = new THREE.RenderPass(scene, camera);
+  composer.addPass(renderPass);
+
+  outlinePass = new THREE.OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
+  composer.addPass(outlinePass);
 
   window.addEventListener('resize', onWindowResize, false);
 
@@ -121,21 +159,94 @@ function init() {
 
   });
 
+  window.addEventListener('mousemove', onTouchMove);
+  window.addEventListener('touchmove', onTouchMove);
+
+  function onTouchMove(event) {
+
+    var x, y;
+
+    if (event.changedTouches) {
+
+      x = event.changedTouches[0].pageX;
+      y = event.changedTouches[0].pageY;
+
+    } else {
+
+      x = event.clientX;
+      y = event.clientY;
+
+    }
+
+    mouse.x = (x / window.innerWidth) * 2 - 1;
+    mouse.y = -(y / window.innerHeight) * 2 + 1;
+
+    checkIntersection();
+
+    render()
+  }
+
+  function addSelectedObject(object) {
+
+    selectedObjects = [];
+    selectedObjects.push(object);
+
+  }
+
+  function checkIntersection() {
+
+    raycaster.setFromCamera(mouse, camera);
+
+    var intersects = raycaster.intersectObjects(objects, true);
+
+    if (intersects.length > 0) {
+
+      var selectedObject = intersects[0].object;
+      addSelectedObject(selectedObject);
+      outlinePass.selectedObjects = selectedObjects;
+
+    } else {
+
+      outlinePass.selectedObjects = [];
+
+    }
+
+  }
+
 }
 
 function onWindowResize() {
 
-  camera.aspect = window.innerWidth / window.innerHeight;
+  var width = window.innerWidth;
+  var height = window.innerHeight;
+
+  camera.aspect = width / height;
   camera.updateProjectionMatrix();
 
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(width, height);
+  composer.setSize(width, height);
 
-  render();
+  effectFXAA.uniforms['resolution'].value.set(1 / window.innerWidth, 1 / window.innerHeight);
 
 }
 
 function render() {
 
-  renderer.render(scene, camera);
+  // stats.begin();
+
+  // var timer = performance.now();
+
+  // if (params.rotate) {
+
+  // group.rotation.y = timer * 0.0001;
+
+  // }
+
+  // controls.update();
+
+  // renderer.render(scene, camera)
+  if (window.composer) composer.render();
+
+  // stats.end();
 
 }
