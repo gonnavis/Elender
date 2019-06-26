@@ -75,7 +75,7 @@ function init() {
   });
   var cone = new THREE.Mesh(geometry, material);
   scene.add(cone);
-  cone.position.x=-500
+  cone.position.x = -500
   objects.push(cone)
   // control.attach(cone)
 
@@ -159,10 +159,11 @@ function init() {
 
   });
 
+  window.addEventListener('click', onClick);
   window.addEventListener('mousemove', onTouchMove);
   window.addEventListener('touchmove', onTouchMove);
 
-  function onTouchMove(event) {
+  function onClick(event) {
 
     var x, y;
 
@@ -186,6 +187,30 @@ function init() {
     render()
   }
 
+  function onTouchMove(event) {
+
+    var x, y;
+
+    if (event.changedTouches) {
+
+      x = event.changedTouches[0].pageX;
+      y = event.changedTouches[0].pageY;
+
+    } else {
+
+      x = event.clientX;
+      y = event.clientY;
+
+    }
+
+    mouse.x = (x / window.innerWidth) * 2 - 1;
+    mouse.y = -(y / window.innerHeight) * 2 + 1;
+
+    // checkIntersection();
+
+    render()
+  }
+
   function addSelectedObject(object) {
 
     selectedObjects = [];
@@ -202,8 +227,9 @@ function init() {
     if (intersects.length > 0) {
 
       var selectedObject = intersects[0].object;
-      addSelectedObject(selectedObject);
-      outlinePass.selectedObjects = selectedObjects;
+      // addSelectedObject(selectedObject);
+      // outlinePass.selectedObjects = selectedObjects;
+      control.attach(selectedObject)
 
     } else {
 
